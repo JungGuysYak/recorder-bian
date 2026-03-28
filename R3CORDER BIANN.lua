@@ -1,9 +1,10 @@
 --[[
-    RECORDER BIANN v11.4
+    RECORDER BIANN v11.4 (FIXED)
     - Rekam & Playback dengan animasi normal
     - Merge semua checkpoint tanpa jeda
     - Compress file rekaman
     - Playback smooth tanpa freeze
+    - FIX: karakter tidak melayang saat playback ulang
 ]]
 
 repeat task.wait() until game:IsLoaded()
@@ -570,6 +571,7 @@ local function pauseWalking()
     notif(walkPaused and "⏸️ Pause" or "▶️ Resume", Color3.fromRGB(255,180,60))
 end
 
+-- ==================== FIXED STARTWALKING ====================
 local function startWalking()
     if not currentWalk then
         notif("❌ Pilih rekaman dulu", Color3.fromRGB(255,100,100))
@@ -600,10 +602,17 @@ local function startWalking()
     originalWalkSpeed = hum.WalkSpeed
 
     local firstFrame = frames[1]
-    local currentGround = getGroundLevel(hrp.Position)
+    
+    -- Hitung ground level yang direkam (dari rekaman atau estimasi)
     local recordedGround = firstFrame.groundLevel or (firstFrame.position.y - (firstFrame.hipHeight or 5.33))
-    local yOffset = currentGround - recordedGround
-
+    
+    -- Dapatkan ground level di posisi rekaman (bukan posisi karakter saat ini)
+    local groundAtTarget = getGroundLevel(Vector3.new(firstFrame.position.x, firstFrame.position.y, firstFrame.position.z))
+    
+    -- Hitung offset agar karakter berdiri di tanah di lokasi rekaman
+    local yOffset = groundAtTarget - recordedGround
+    
+    -- Tempatkan karakter di posisi rekaman dengan offset yang sudah dihitung
     hrp.CFrame = CFrame.new(firstFrame.position.x, firstFrame.position.y + yOffset, firstFrame.position.z)
     hrp.AssemblyLinearVelocity = Vector3.zero
     hrp.AssemblyAngularVelocity = Vector3.zero
@@ -1106,9 +1115,10 @@ createGUI()
 refreshRecords()
 
 print("====================================")
-print("📼 RECORDER BIANN v"..VERSION)
+print("📼 RECORDER BIANN v"..VERSION.." FIXED")
 print("✅ Rekam & Playback dengan animasi normal")
 print("✅ Merge semua checkpoint tanpa jeda")
 print("✅ Compress file rekaman")
 print("✅ Playback smooth tanpa freeze")
+print("✅ FIX: karakter tidak melayang saat playback ulang")
 print("====================================")
